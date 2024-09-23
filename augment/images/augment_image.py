@@ -46,12 +46,12 @@ class AugmentImageDataset():
             basename, ext = os.path.splitext(f)
             if basename not in data_dict:
                 data_dict[basename] = {'image': None, 'label': None}
-            data_dict[basename]['image'] = f
+            data_dict[basename]['image'] = Path(images_path) / f
         for f in label_files:
             basename, ext = os.path.splitext(f)
             if basename not in data_dict:
                 data_dict[basename] = {'image': None, 'label': None}
-            data_dict[basename]['label'] = f
+            data_dict[basename]['label'] = Path(labels_path) / f
         return data_dict
     
 
@@ -71,11 +71,8 @@ class AugmentImageDataset():
     def process_dataset(self):
         for key, sub_dict in tqdm(self.all_data.items()):
             for sub_key, value in tqdm(sub_dict.items(), desc=f"Processing folder {key}"):
-                for key, value in value.items():
-                    if key == 'image':
-                        image = Image()
-                    # elif key == 'label':
-                    #     annotation = Annotation()
+                ap = AugmentProcessor(image_path=value['image'], 
+                                      annotation_path=value['label'])
         
 
 
@@ -95,26 +92,20 @@ class AugmentImageDataset():
 
 
 
-class Image():
-    def __init__(self) -> None:
-        self.image_path = None
-        self.image_shape = None
-        self.image_name = None
-
-    def get_image_name(self):
-        return self.image_name
+class AugmentProcessor():
+    def __init__(self, image_path, annotation_path): #save_folder_path, current_data_path):
+        self.image_path = image_path
+        self.annotation_path = annotation_path
+        print(self.image_path)
+        # self.save_image_path = self._construct_save_path(save_folder_path, self.image_path)
+        # self.save_annotation_path = self._construct_save_path(save_folder_path, self.annotation_path)
+        # self.current_full_image_path = self._construct_save_path(current_data_path, self.annotation_path)
+        # self.current_full_annotation_path = self._construct_save_path(current_data_path, self.annotation_path)
+        # print(self.current_full_annotation_path)
+        
     
-    def save_image(self, name, path, img):
-        cv2.imwrite('output.jpg', img)
-
-
-class Annotation():
-    def __init__(self) -> None:
-        self.annotaion_name = None
-        self.annotaion_path = None
-
-    def get_annotation_name(self):
-        return self.annotaion_name
+    def save_image(self, name, img):
+        cv2.imwrite(self.save_image_path / name, img)
 
 
 
