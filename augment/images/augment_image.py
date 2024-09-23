@@ -1,7 +1,9 @@
 import os
+import cv2
+from tqdm import tqdm
 from pathlib import Path
 from core.utils import get_current_time, create_new_directory, get_parent_directory, get_parent_directory
-from core.utils import get_basename, replicate_directory_structure
+from core.utils import get_basename, replicate_directory_structure, count_similar_folders
 
 
 class AugmentImageDataset():
@@ -10,6 +12,7 @@ class AugmentImageDataset():
         self.classes_path = classes_path
         self.new_data_path = self.create_new_dataset_folder()
         self.all_data = self.preprocess()
+        self.process_dataset()
         
 
     # Preprocessing
@@ -66,7 +69,14 @@ class AugmentImageDataset():
 
     # processing
     def process_dataset(self):
-        pass
+        for key, sub_dict in tqdm(self.all_data.items()):
+            for sub_key, value in tqdm(sub_dict.items(), desc=f"Processing folder {key}"):
+                for key, value in value.items():
+                    if key == 'image':
+                        image = Image()
+                    # elif key == 'label':
+                    #     annotation = Annotation()
+        
 
 
     # new dataset folder
@@ -75,7 +85,8 @@ class AugmentImageDataset():
         parent_dir = get_parent_directory(path)
         base_name = get_basename(path)
         timestamp = get_current_time()
-        new_dir_name = f"{base_name}_{timestamp}"
+        version = count_similar_folders(parent_dir, base_name)
+        new_dir_name = f"{base_name}-V{version}-{timestamp}"
         new_dir_path = os.path.join(parent_dir, new_dir_name)
         
         create_new_directory(new_dir_path)
@@ -92,6 +103,9 @@ class Image():
 
     def get_image_name(self):
         return self.image_name
+    
+    def save_image(self, name, path, img):
+        cv2.imwrite('output.jpg', img)
 
 
 class Annotation():

@@ -24,12 +24,23 @@ def get_parent_directory(path):
     return parent_dir
 
 
+def count_similar_folders(path, folder_name):
+    folder_name_lower = folder_name.lower()
+    count = 0
+    for root, dirs, files in os.walk(path):
+        for dir_name in dirs:
+            if folder_name_lower in dir_name.lower():
+                count += 1
+    return count
+
+
 def get_basename(path):
     """
     Возвращает базовое имя директории path.
     """
     base_name = os.path.basename(path)
     return base_name
+
 
 def replicate_directory_structure(old_dir_path, new_dir_path):
     """
