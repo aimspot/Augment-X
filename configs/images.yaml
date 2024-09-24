@@ -1,0 +1,17 @@
+data_path: "/Users/misha/Desktop/GitHub/Augment-X/Warp-D"
+
+classes_txt_path:
+
+# Change image size
+change_size: True   #True/False
+save_propoptions: True
+w_img: 640
+h_img: 640
+
+#crop_image (px)
+crop_img: True   #True/False
+use_current_size: True  #True/False
+crop_left: 20
+crop_right: 20
+crop_top: 30
+crop_bottom: 20
