@@ -52,8 +52,8 @@ def load_yolo_annotations(yolo_annotation_path):
     return annotations
 
 # Пример использования:
-image_path = '/Users/misha/Desktop/GitHub/Augment-X/Warp-D/test/images/Monitoring_photo_2_test_25-Mar_11-09-46.jpg'
-annotation_path = '/Users/misha/Desktop/GitHub/Augment-X/Warp-D/test/labels/Monitoring_photo_2_test_25-Mar_11-09-46.txt'
+image_path = '/Users/misha/Desktop/GitHub/Augment-X/Warp-D-V2-15_07_12/test/images/Monitoring_photo_2_test_25-Mar_11-09-46.jpg'
+annotation_path = '/Users/misha/Desktop/GitHub/Augment-X/Warp-D-V2-15_07_12/test/labels/Monitoring_photo_2_test_25-Mar_11-09-46.txt'
 output_image_path = '/Users/misha/Desktop/GitHub/Augment-X/output_image_with_boxes.jpg'
 
 draw_bounding_boxes(image_path, annotation_path, output_image_path)
