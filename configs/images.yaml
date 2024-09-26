@@ -1,19 +1,19 @@
 data_path: "/Users/misha/Desktop/GitHub/Augment-X/Warp-D"
 
-classes_txt_path:
+# classes_txt_path:
 
-# example ['change_size', 'crop_image', 'change_size']
-preprocessing: ['change_size']
-augmentations: []
+# example ['resize_image', 'crop_image', 'resize_image']
+preprocessing: ['resize_image', 'crop_image']
+augmentations: ['resize_image']
 
 # Change image size
-save_propoptions: True
+save_proportions: False
 w_img: 640
 h_img: 640
 
 #Crop_image (px)
-crop_left: 20
-crop_right: 20
-crop_top: 30
-crop_bottom: 
+crop_left: 100
+crop_right: 100
+crop_top: 0
+crop_bottom: 200
 

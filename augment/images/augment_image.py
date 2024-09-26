@@ -5,6 +5,7 @@ from pathlib import Path
 from core.config_data import get_image_config
 from core.utils import get_current_time, create_new_directory, get_parent_directory, get_parent_directory
 from core.utils import get_basename, replicate_directory_structure, count_similar_folders
+from augment.images.processor_image import ImageProcessor
 
 
 class AugmentImageDataset():
@@ -106,19 +107,20 @@ class AugmentProcessor():
         self.save_image_path = Path(self.save_folder_path) / self.image_folder_type
         self.save_annotation_path = Path(self.save_folder_path) / self.annotation_folder_type
 
-        self.image_basename = get_basename(self.image_path)
-        self.annotation_basename = get_basename(self.annotation_path)
 
-        self.image = self._open_image(self.image_path)
-        self.annotation = self._open_annotation(self.annotation_path)
+        ip = ImageProcessor(image_path=self.image_path,
+                            annotation_path=self.annotation_path,
+                            save_image_path=self.save_image_path,
+                            save_annotation_path=self.save_annotation_path)
+
 
         self.function_mapping = {
-            'change_size': self._change_size_image
+            'resize_image': ip.change_size_image,
+            'crop_image': ip.crop_image
         }
 
         self.processing_augmentation()
         
-
 
     def _get_relative_difference(self, current_path, save_path):
         current_path = Path(current_path)
@@ -138,115 +140,7 @@ class AugmentProcessor():
         for augmentation in augmentations:
             self.function_mapping[augmentation](preprocess=False, **config_data)
 
-
-
-    # open files
-    def _open_image(self, image_path):
-        return cv2.imread(image_path)
     
     
-    def _open_annotation(self, annotation_path):
-        annotations = []
-        with open(annotation_path, 'r') as f:
-            for line in f:
-                annotation = [float(x) for x in line.strip().split()]
-                annotations.append(annotation)
-        return annotations
-    
-    
-    
-    #resize 
-    def _change_size_image(self, w_img, h_img, save_propoptions, preprocess, **kwargs):
-        img = self.image
-        original_height, original_width = img.shape[:2]
-
-        if save_propoptions:
-            aspect_ratio = original_width / original_height
-            if w_img / h_img > aspect_ratio:
-                new_height = h_img
-                new_width = int(h_img * aspect_ratio)
-            else:
-                new_width = w_img
-                new_height = int(w_img / aspect_ratio)
-        else:
-            new_width = w_img
-            new_height = h_img
-
-        resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
-
-        self._change_size_annotation(original_width=original_width,
-                                    original_height=original_height,
-                                    new_height=new_height,
-                                    new_width=new_width,
-                                    preprocess=preprocess)
-        
-        self._save_image(name=self.image_basename, img=resized_img, preprocessing=preprocess)
-
-    
-    def _change_size_annotation(self, original_width, original_height, new_width, new_height, preprocess, **kwargs):
-        new_annotations = []
-        scale_x = new_width / original_width
-        scale_y = new_height / original_height
-        
-        for ann in self.annotation:
-            if ann:
-                class_id, x_center, y_center, width, height = ann
-                
-                x_center_abs = x_center * original_width
-                y_center_abs = y_center * original_height
-                width_abs = width * original_width
-                height_abs = height * original_height
-
-                x_center_new = x_center_abs * scale_x / new_width
-                y_center_new = y_center_abs * scale_y / new_height
-                width_new = width_abs * scale_x / new_width
-                height_new = height_abs * scale_y / new_height
-
-                x_center_new = min(max(x_center_new, 0), 1)
-                y_center_new = min(max(y_center_new, 0), 1)
-                width_new = min(max(width_new, 0), 1)
-                height_new = min(max(height_new, 0), 1)
-
-                new_ann = [class_id, x_center_new, y_center_new, width_new, height_new]
-                new_annotations.append(new_ann)
-
-        self._save_yolo_annotations(annotations=new_annotations,
-                                    name=self.annotation_basename,
-                                    preprocessing=preprocess)
-        
-    #crop
-    def _crop_image(self, crop_left, crop_right, crop_top, crop_bottom, **kwargs):
-        img = self.image
-        original_height, original_width = img.shape[:2]
-
-        new_left = crop_left
-        new_right = original_width - crop_right
-        new_top = crop_top
-        new_bottom = original_height - crop_bottom
-
-        cropped_img = img[new_top:new_bottom, new_left:new_right]
-
-        self._save_image(name=self.image_basename, img=cropped_img)
-
-        self._crop_annotations(crop_left, crop_right, crop_top, crop_bottom, original_width, original_height)
-
-   # save
-    def _save_image(self, name, img, preprocessing):
-        if not preprocessing:
-            cv2.imwrite(self.save_image_path / name, img)
-        else:
-            self.image = img
-
-
-    def _save_yolo_annotations(self, annotations, name, preprocessing):
-        if not preprocessing:
-            new_annotation_path = Path(self.save_annotation_path) / name
-            with open(new_annotation_path, 'w') as f:
-                for annotation in annotations:
-                    f.write(" ".join(map(str, annotation)) + '\n')
-        else:
-            self.annotation = annotations
-
-
 
 
