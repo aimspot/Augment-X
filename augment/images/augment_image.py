@@ -115,8 +115,12 @@ class AugmentProcessor():
 
 
         self.function_mapping = {
+            'basic': ip.preprocessing_save_image,
             'resize_image': ip.change_size_image,
-            'crop_image': ip.crop_image
+            'crop_image': ip.crop_image,
+            'flip_horizontal': ip.flip_horizontal_image,
+            'flip_vertical': ip.flip_vertical_image,
+            'flip_both':ip.flip_both_image
         }
 
         self.processing_augmentation()

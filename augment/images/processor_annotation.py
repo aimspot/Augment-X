@@ -1,10 +1,13 @@
 from pathlib import Path
 from core.utils import get_basename
+from core.utils import get_basename, get_stem, get_suffix, set_new_filename
 
 class AnnotationProcessor:
     def __init__(self, annotation_path, save_annotation_path):
         self.annotation_path = annotation_path
         self.annotation_basename = get_basename(self.annotation_path)
+        self.annotation_stem_name = get_stem(self.annotation_basename)
+        self.annotation_suffix_name = get_suffix(self.annotation_basename)
         self.annotation = self.open_annotation(self.annotation_path)
         self.save_annotation_path = save_annotation_path
 
@@ -27,7 +30,8 @@ class AnnotationProcessor:
         else:
             self.annotation = annotations
     
-
+    #REFACTOR THIS 
+    #change size
     def change_size_annotation(self, original_width, original_height, new_width, new_height, preprocess, **kwargs):
         new_annotations = []
         scale_x = new_width / original_width
@@ -59,6 +63,7 @@ class AnnotationProcessor:
                                     preprocessing=preprocess)
         
         
+    #crop    
     def crop_annotations(self, crop_left, crop_right, crop_top, crop_bottom, original_width, original_height, preprocess):
         new_annotations = []
         new_width = original_width - crop_left - crop_right
@@ -93,6 +98,76 @@ class AnnotationProcessor:
         self.save_yolo_annotations(annotations=new_annotations,
                                     name=self.annotation_basename,
                                     preprocessing=preprocess)
+        
+    #save basic annotation after preprocessing    
+    def preprocessing_save_annotation(self, preprocess, **kwargs):
+        self.save_yolo_annotations(annotations=self.annotation,
+                                    name=self.annotation_basename,
+                                    preprocessing=preprocess)
+
+        
+    #flip horizontal 
+    def flip_horizontal_annotation(self, preprocess):
+        new_annotations = []
+        for ann in self.annotation:
+            if ann:
+                class_id, x_center, y_center, width, height = ann
+                x_center = 1.0 - x_center
+                x_center = self._get_limitations(x_center)
+                y_center = self._get_limitations(y_center)
+
+                new_ann = [class_id, x_center, y_center, width, height]
+                new_annotations.append(new_ann)
+
+        new_name = set_new_filename(stem=self.annotation_stem_name, 
+                                    augmentation='flip_horizontal', suffix=self.annotation_suffix_name)
+        
+        self.save_yolo_annotations(annotations=new_annotations,
+                                    name=new_name,
+                                    preprocessing=preprocess)
+        
+    #flip vertical
+    def flip_vertical_annotation(self, preprocess):
+        new_annotations = []
+        for ann in self.annotation:
+            if ann:
+                class_id, x_center, y_center, width, height = ann
+                y_center = 1.0 - y_center
+                x_center = self._get_limitations(x_center)
+                y_center = self._get_limitations(y_center)
+
+                new_ann = [class_id, x_center, y_center, width, height]
+                new_annotations.append(new_ann)
+
+        new_name = set_new_filename(stem=self.annotation_stem_name, 
+                                    augmentation='flip_vertical', suffix=self.annotation_suffix_name)
+        
+        self.save_yolo_annotations(annotations=new_annotations,
+                                    name=new_name,
+                                    preprocessing=preprocess)
+    
+     #flip vertical
+    def flip_both_annotation(self, preprocess):
+        new_annotations = []
+        for ann in self.annotation:
+            if ann:
+                class_id, x_center, y_center, width, height = ann
+                x_center = 1.0 - x_center
+                y_center = 1.0 - y_center
+                x_center = self._get_limitations(x_center)
+                y_center = self._get_limitations(y_center)
+
+                new_ann = [class_id, x_center, y_center, width, height]
+                new_annotations.append(new_ann)
+
+        new_name = set_new_filename(stem=self.annotation_stem_name, 
+                                    augmentation='flip_both', suffix=self.annotation_suffix_name)
+        
+        self.save_yolo_annotations(annotations=new_annotations,
+                                    name=new_name,
+                                    preprocessing=preprocess)
+        
+        
 
     # annotation extra function
     def _get_absolute_coordinates(self, x_center, y_center, width, height, original_width, original_height):

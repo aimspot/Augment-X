@@ -1,13 +1,16 @@
 import cv2
-from core.utils import get_basename
+from core.utils import get_basename, get_stem, get_suffix, set_new_filename
 from augment.images.processor_annotation import AnnotationProcessor
 
 class ImageProcessor:
     def __init__(self, image_path, annotation_path, save_image_path, save_annotation_path):
         self.image_path = image_path
         self.image_basename = get_basename(self.image_path)
+        self.image_stem_name = get_stem(self.image_basename)
+        self.image_suffix_name = get_suffix(self.image_basename)
         self.image = self.open_image(self.image_path)
         self.save_image_path = save_image_path
+
         self.ap = AnnotationProcessor(annotation_path=annotation_path,
                                  save_annotation_path=save_annotation_path)
     
@@ -58,6 +61,46 @@ class ImageProcessor:
                                original_width=original_width, original_height=original_height,
                                preprocess=preprocess)
         
+    #save basic image after preprocessing
+    def preprocessing_save_image(self, preprocess, **kwargs):
+        self.ap.preprocessing_save_annotation(preprocess=preprocess)
+        self._save_image(name=self.image_basename, img=self.image, preprocessing=preprocess)
+
+        
+    #flip
+    def flip_image(self, image, flip_code):
+        return cv2.flip(self.image, flip_code)
+    
+    
+    #flip horizontal
+    def flip_horizontal_image(self, preprocess, **kwargs):
+        image = self.flip_image(image=self.image, flip_code=1)
+        new_name = set_new_filename(stem=self.image_stem_name, 
+                                    augmentation='flip_horizontal', suffix=self.image_suffix_name)
+        self._save_image(name=new_name, img=image, preprocessing=preprocess)
+        self.ap.flip_horizontal_annotation(preprocess=preprocess)
+
+
+    #flip vertical
+    def flip_vertical_image(self, preprocess, **kwargs):
+        image = self.flip_image(image=self.image, flip_code=0)
+        new_name = set_new_filename(stem=self.image_stem_name, 
+                                    augmentation='flip_vertical', suffix=self.image_suffix_name)
+        self._save_image(name=new_name, img=image, preprocessing=preprocess)
+        self.ap.flip_vertical_annotation(preprocess=preprocess)
+
+
+    #flip-both
+    def flip_both_image(self, preprocess, **kwargs):
+        image = self.flip_image(image=self.image, flip_code=-1)
+        # image = self.flip_image(image=image, flip_code=1)
+        new_name = set_new_filename(stem=self.image_stem_name, 
+                                    augmentation='flip_both', suffix=self.image_suffix_name)
+        self._save_image(name=new_name, img=image, preprocessing=preprocess)
+        self.ap.flip_both_annotation(preprocess=preprocess)
+
+
+
     #save
     def _save_image(self, name, img, preprocessing):
         if not preprocessing:

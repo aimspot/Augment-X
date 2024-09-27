@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 def get_current_time():
     """
@@ -52,4 +53,16 @@ def replicate_directory_structure(old_dir_path, new_dir_path):
         for d in dirs:
             dir_path = os.path.join(target_dir, d)
             os.makedirs(dir_path, exist_ok=True)
+
+
+def get_stem(basename):
+    return Path(basename).stem
+
+
+def get_suffix(basename):
+    return Path(basename).suffix
+
+def set_new_filename(stem, augmentation, suffix):
+    return f"{stem}_{augmentation}{suffix}"
+
            

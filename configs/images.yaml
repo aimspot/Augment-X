@@ -2,9 +2,10 @@ data_path: "/Users/misha/Desktop/GitHub/Augment-X/Warp-D"
 
 # classes_txt_path:
 
-# example ['resize_image', 'crop_image', 'resize_image']
-preprocessing: ['resize_image', 'crop_image']
-augmentations: ['resize_image']
+# example ['resize_image', 'crop_image']
+# augmentations ['basic','flip_horizontal', 'flip_vertical', 'flip_both']
+preprocessing: ['resize_image', 'crop_image', 'resize_image']
+augmentations: ['basic','flip_horizontal', 'flip_vertical', 'flip_both']
 
 # Change image size
 save_proportions: False
@@ -16,4 +17,6 @@ crop_left: 100
 crop_right: 100
 crop_top: 0
 crop_bottom: 200
+
+
 
